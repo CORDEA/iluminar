@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class HomePage extends StatelessWidget {
@@ -32,6 +34,7 @@ class _IluminarPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final maxHeight = sqrt(pow(size.width, 2) + pow(size.height, 2));
     final rect = Rect.fromLTWH(0, 0, size.width, size.height);
     canvas.drawRect(rect, _backgroundPaint);
 
@@ -61,7 +64,14 @@ class _IluminarPainter extends CustomPainter {
         -_lightShadeHeight,
       )
       ..close();
-    canvas.drawPath(lightShadePath, _lightPaint);
+    final rotateMatrix = Matrix4.identity()
+      ..translate(centerX)
+      ..rotateZ(pi / 8)
+      ..translate(-centerX);
+    canvas.drawPath(
+      lightShadePath.transform(rotateMatrix.storage),
+      _lightPaint,
+    );
 
     final y = _lightShadeHeight + _cableHeight;
     final startWidth = _lightShadeWidth + _cableWidth;
@@ -69,12 +79,16 @@ class _IluminarPainter extends CustomPainter {
     final lightPath = Path()
       ..moveTo(centerX - startWidth / 2, y)
       ..lineTo(centerX + startWidth / 2, y)
-      ..lineTo(centerX + endWidth / 2, size.height)
-      ..lineTo(centerX - endWidth / 2, size.height)
+      ..lineTo(centerX + endWidth / 2, maxHeight)
+      ..lineTo(centerX - endWidth / 2, maxHeight)
       ..close();
     final basePath = Path()
       ..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
-    final path = Path.combine(PathOperation.difference, basePath, lightPath);
+    final path = Path.combine(
+      PathOperation.difference,
+      basePath,
+      lightPath.transform(rotateMatrix.storage),
+    );
 
     canvas.clipPath(path);
     canvas.drawPath(path, _foregroundPaint);
