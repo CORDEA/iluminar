@@ -22,11 +22,11 @@ class _IluminarPainter extends CustomPainter {
   static const double _cableHeight = 5;
   static const double _lightShadeWidth = 90;
   static const double _lightShadeHeight = 50;
-  static const double _startWidth = 0.2;
-  static const double _endWidth = 0.7;
+  static const double _endWidth = 0.6;
 
   final _lightPaint = Paint()..color = Colors.black;
-  final _foregroundPaint = Paint()..color = Colors.black;
+  final _foregroundPaint = Paint()
+    ..color = Colors.black.withAlpha((255 * 0.9).toInt());
   final _backgroundPaint = Paint()
     ..color = Colors.yellow.withAlpha((255 * 0.4).toInt());
 
@@ -63,11 +63,12 @@ class _IluminarPainter extends CustomPainter {
       ..close();
     canvas.drawPath(lightShadePath, _lightPaint);
 
-    final startWidth = size.width * _startWidth;
+    final y = _lightShadeHeight + _cableHeight;
+    final startWidth = _lightShadeWidth + _cableWidth;
     final endWidth = size.width * _endWidth;
     final lightPath = Path()
-      ..moveTo(centerX - startWidth / 2, 0)
-      ..lineTo(centerX + startWidth / 2, 0)
+      ..moveTo(centerX - startWidth / 2, y)
+      ..lineTo(centerX + startWidth / 2, y)
       ..lineTo(centerX + endWidth / 2, size.height)
       ..lineTo(centerX - endWidth / 2, size.height)
       ..close();
