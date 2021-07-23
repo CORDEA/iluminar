@@ -6,9 +6,8 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomPaint(
-        foregroundPainter: _IluminarPainter(),
-        child: Center(
+      body: _AnimatedIluminarContainer(
+        builder: (context) => Center(
           child: Text(
             'Iluminar',
             style: Theme.of(context).textTheme.headline2,
@@ -19,12 +18,60 @@ class HomePage extends StatelessWidget {
   }
 }
 
+class _AnimatedIluminarContainer extends StatefulWidget {
+  const _AnimatedIluminarContainer({
+    Key? key,
+    required this.builder,
+  }) : super(key: key);
+
+  final WidgetBuilder builder;
+
+  @override
+  State<StatefulWidget> createState() => _AnimatedIluminarContainerState();
+}
+
+class _AnimatedIluminarContainerState extends State<_AnimatedIluminarContainer>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller =
+        AnimationController(vsync: this, duration: Duration(seconds: 4))
+          ..addListener(() {
+            setState(() {});
+          })
+          ..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      foregroundPainter: _IluminarPainter(
+        angle: (_controller.value * 2 - 1) * (pi / 32),
+      ),
+      child: widget.builder(context),
+    );
+  }
+}
+
 class _IluminarPainter extends CustomPainter {
+  _IluminarPainter({required this.angle});
+
   static const double _cableWidth = 4;
   static const double _cableHeight = 5;
   static const double _lightShadeWidth = 90;
   static const double _lightShadeHeight = 50;
   static const double _endWidth = 0.6;
+
+  final double angle;
 
   final _lightPaint = Paint()..color = Colors.black;
   final _foregroundPaint = Paint()
@@ -66,7 +113,7 @@ class _IluminarPainter extends CustomPainter {
       ..close();
     final rotateMatrix = Matrix4.identity()
       ..translate(centerX)
-      ..rotateZ(pi / 8)
+      ..rotateZ(angle)
       ..translate(-centerX);
     canvas.drawPath(
       lightShadePath.transform(rotateMatrix.storage),
