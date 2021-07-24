@@ -37,12 +37,14 @@ class _AnimatedIluminarContainerState extends State<_AnimatedIluminarContainer>
   @override
   void initState() {
     super.initState();
-    _controller =
-        AnimationController(vsync: this, duration: Duration(seconds: 4))
-          ..addListener(() {
-            setState(() {});
-          })
-          ..repeat(reverse: true);
+    _controller = AnimationController(vsync: this)
+      ..addListener(() {
+        setState(() {});
+      })
+      ..animateWith(_RepeatingCurvedSimulation(
+        Duration(seconds: 4),
+        Curves.easeInOut,
+      ));
   }
 
   @override
@@ -145,4 +147,29 @@ class _IluminarPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return true;
   }
+}
+
+class _RepeatingCurvedSimulation extends Simulation {
+  _RepeatingCurvedSimulation(
+    Duration duration,
+    this.curve,
+  ) : duration = duration.inMicroseconds / Duration.microsecondsPerSecond;
+
+  final double duration;
+  final Curve curve;
+
+  @override
+  double x(double time) {
+    final x = (time / duration) % 1;
+    if ((time ~/ duration).isOdd) {
+      return 1 - curve.transform(x);
+    }
+    return curve.transform(x);
+  }
+
+  @override
+  double dx(double time) => time;
+
+  @override
+  bool isDone(double time) => false;
 }
